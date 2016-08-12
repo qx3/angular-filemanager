@@ -18,10 +18,10 @@
         </tr>
         <tr ng-show="!fileNavigator.requesting && !fileNavigator.listHasFolders() && !fileNavigator.error">
             <td colspan="2">
-                {{"no_folders_in_folder" | translate}}...
+				{{"no_folders_in_folder" | translate}}
             </td>
             <td class="text-right">
-                <button class="btn btn-sm btn-default" ng-click="fileNavigator.upDir()">{{"go_back" | translate}}</button>
+                <button class="btn btn-sm btn-yellow" ng-click="fileNavigator.upDir()">{{"go_back" | translate}}</button>
             </td>
         </tr>
         <tr ng-show="!fileNavigator.requesting && fileNavigator.error">
@@ -32,13 +32,13 @@
         <tr ng-repeat="item in fileNavigator.fileList | orderBy:predicate:reverse" ng-show="!fileNavigator.requesting && item.model.type === 'dir'">
             <td>
                 <a href="" ng-click="fileNavigator.folderClick(item)" title="{{item.model.name}} ({{item.model.sizeKb()}}kb)">
-                    <i class="glyphicon glyphicon-folder-close"></i>
-                    {{item.model.name | strLimit : 32}}
+                    <i class="fa fa-folder"></i>
+                    <span class="text-black">{{item.model.name | strLimit : 32}}</span>
                 </a>
             </td>
             <td class="text-right">
-                <button class="btn btn-sm btn-default" ng-click="select(item, temp)">
-                    <i class="glyphicon glyphicon-hand-up"></i> {{"select_this" | translate}}
+                <button class="btn btn-sm btn-yellow" ng-click="select(item, temp)">
+                    {{"select_this" | translate}}
                 </button>
             </td>
         </tr>

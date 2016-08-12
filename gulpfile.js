@@ -32,7 +32,7 @@ gulp.task('cache-templates', function () {
 
 gulp.task('concat-uglify-js', ['clean', 'cache-templates'], function() {
   return gulp.src([
-    src + 'js/app.js',
+      src + 'js/app.js',
       src + 'js/*/*.js',
       dst + '/' + jsFile
     ])

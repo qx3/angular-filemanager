@@ -1,7 +1,7 @@
 (function(angular) {
     "use strict";
     angular.module('FileManagerApp').service('fileNavigator', [
-        '$http', '$q', 'fileManagerConfig', 'item', function ($http, $q, fileManagerConfig, Item) {
+        '$http', '$q', 'fileManagerConfig', 'item', '$rootScope', function ($http, $q, fileManagerConfig, Item, $rootScope) {
 
         $http.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -11,14 +11,19 @@
             this.currentPath = [];
             this.history = [];
             this.error = '';
+      			this.parentId = '';
+      			this.id = '';
+      			this.folderInfo = [];
         };
 
+
         FileNavigator.prototype.deferredHandler = function(data, deferred, defaultMsg) {
+
             if (!data || typeof data !== 'object') {
                 this.error = 'Bridge response error, please check the docs';
             }
-            if (!this.error && data.result && data.result.error) {
-                this.error = data.result.error;
+            if (!this.error && data && data.error) {
+                this.error = data.error;
             }
             if (!this.error && data.error) {
                 this.error = data.error.message;
@@ -32,21 +37,58 @@
             return deferred.resolve(data);
         };
 
+
+
         FileNavigator.prototype.list = function() {
-            var self = this;
-            var deferred = $q.defer();
-            var path = self.currentPath.join('/');
-            var data = {params: {
-                mode: "list",
-                onlyFolders: false,
-                path: '/' + path
-            }};
+
+          var contentId = window.location.href.split("documents/")[1];
+          var self = this;
+          var deferred = $q.defer();
+          var path = self.currentPath.join('/');
+    			var parentId = null;
+    			var startDate = null;
+    			var endDate = null;
+    			var fileName = "";
+    			var contentType = "";
+
+  			  if($rootScope.parentId != undefined && $rootScope.parentId != ""){
+  				    parentId = $rootScope.parentId;
+    			}
+          else
+          {
+    				  self.currentPath = [];
+    			}
+
+			if($rootScope.dtPickersQuery != null){
+				startDate = $rootScope.dtPickersQuery.startDate;
+				endDate = $rootScope.dtPickersQuery.endDate;
+			}
+
+			if($rootScope.fileNameQuery != undefined){
+				fileName = $rootScope.fileNameQuery;
+			}
+			if($rootScope.contetTypeQuery != undefined){
+				contentType = $rootScope.contetTypeQuery;
+			}
+
+			var data = {
+    				companyToken: sessionStorage.getItem('company'),
+    				parentId: parentId,
+    				startDate: startDate,
+    				endDate: endDate,
+    				fileName: fileName,
+    				contentType: contentType,
+            contentId: contentId
+            };
 
             self.requesting = true;
             self.fileList = [];
             self.error = '';
 
             $http.post(fileManagerConfig.listUrl, data).success(function(data) {
+
+				        $rootScope.listFiles = data;
+
                 self.deferredHandler(data, deferred);
             }).error(function(data) {
                 self.deferredHandler(data, deferred, 'Unknown error listing, check the response');
@@ -59,9 +101,8 @@
         FileNavigator.prototype.refresh = function() {
             var self = this;
             var path = self.currentPath.join('/');
-            
             return self.list().then(function(data) {
-                self.fileList = (data.result || []).map(function(file) {
+                self.fileList = (data || []).map(function(file) {
                     return new Item(file, self.currentPath);
                 })
                 self.buildTree(path);
@@ -103,7 +144,11 @@
             var self = this;
             self.currentPath = [];
             if (item && item.isFolder()) {
-                self.currentPath = item.model.fullPath().split('/').splice(1);
+      				self.currentPath = item.model.fullPath().split('/').splice(1);
+              self.id = item.model.id;
+      				self.folderInfo.push({id: item.model.id, folder: item.model.name});
+      				$rootScope.parentId = self.id;
+      				$rootScope.fullPath = item.model.fullPath();
             }
             self.refresh();
         };
@@ -112,6 +157,17 @@
             var self = this;
             if (self.currentPath[0]) {
                 self.currentPath = self.currentPath.slice(0, -1);
+				if(self.currentPath.length > 0){
+					for(var i = 0; i < self.folderInfo.length; i++){
+						if(self.folderInfo[i].folder == self.currentPath.toString()){
+							self.id = self.folderInfo[i].id;
+						}
+					}
+				}else{
+					self.id = "";
+				}
+				$rootScope.fullPath = self.currentPath.join('/');
+				$rootScope.parentId = self.id;
                 self.refresh();
             }
         };
@@ -119,6 +175,19 @@
         FileNavigator.prototype.goTo = function(index) {
             var self = this;
             self.currentPath = self.currentPath.slice(0, index + 1);
+
+			if(self.currentPath.length > 0){
+				for(var i = 0; i < self.folderInfo.length; i++){
+					if(self.folderInfo[i].folder == self.currentPath[self.currentPath.length - 1]){
+						self.id = self.folderInfo[i].id;
+					}
+				}
+			}else{
+				self.id = "";
+			}
+			$rootScope.fullPath = self.currentPath.join('/');
+			$rootScope.parentId = self.id;
+
             self.refresh();
         };
 

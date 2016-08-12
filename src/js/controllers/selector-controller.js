@@ -5,7 +5,7 @@
         function($scope, $rootScope, FileNavigator) {
 
         $scope.reverse = false;
-        $scope.predicate = ['model.type', 'model.name'];        
+        $scope.predicate = ['model.type', 'model.name'];
         $scope.order = function(predicate) {
             $scope.reverse = ($scope.predicate[1] === predicate) ? !$scope.reverse : false;
             $scope.predicate[1] = predicate;
@@ -15,6 +15,7 @@
 
         $rootScope.select = function(item, temp) {
             temp.tempModel.path = item.model.fullPath().split('/');
+			$rootScope.parentIdChange = item.model.id;
             $('#selector').modal('hide');
         };
 

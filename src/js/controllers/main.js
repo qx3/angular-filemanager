@@ -1,14 +1,13 @@
 (function(window, angular, $) {
     "use strict";
     angular.module('FileManagerApp').controller('FileManagerCtrl', [
-    '$scope', '$translate', '$cookies', 'fileManagerConfig', 'item', 'fileNavigator', 'fileUploader',
-    function($scope, $translate, $cookies, fileManagerConfig, Item, FileNavigator, FileUploader) {
-
+    '$scope', '$translate', '$rootScope', '$cookies', 'fileManagerConfig', 'item', 'fileNavigator', 'fileUploader', 'session', '$http',
+    function($scope, $translate, $rootScope, $cookies, fileManagerConfig, Item, FileNavigator, FileUploader, session, $http) {
         $scope.config = fileManagerConfig;
         $scope.appName = fileManagerConfig.appName;
 
         $scope.reverse = false;
-        $scope.predicate = ['model.type', 'model.name'];        
+        $scope.predicate = ['model.type', 'model.name'];
         $scope.order = function(predicate) {
             $scope.reverse = ($scope.predicate[1] === predicate) ? !$scope.reverse : false;
             $scope.predicate[1] = predicate;
@@ -25,12 +24,48 @@
             $scope.viewTemplate = $cookies.viewTemplate = name;
         };
 
-        $scope.changeLanguage = function (locale) {
+		/*$scope.changeLanguage = function (locale) {
             if (locale) {
                 return $translate.use($cookies.language = locale);
             }
             $translate.use($cookies.language || fileManagerConfig.defaultLang);
-        };
+        };*/
+
+        $scope.contentId = window.location.href.split("documents/")[1];
+		//combo de mes e ano
+		$scope.referenceYears = [];
+		$scope.referenceMonths = [];
+
+		for (var i = 0; i < 10; i++) {
+			var year = (new Date()).getFullYear();
+			year += i;
+			$scope.referenceYears.push(year);
+		};
+
+		for (var i = 1; i <= 12; i++) {
+			var m = {
+				month: i,
+				label: i < 10 ? ('0' + i.toString()) : i.toString()
+			};
+			$scope.referenceMonths.push(m);
+		}
+		//fim combo mes e ano
+
+		$scope.$watch('datePickers', function (v) {
+			$rootScope.dtPickersQuery = $scope.datePickers;
+			$scope.fileNavigator.refresh();
+		});
+
+		$scope.$watch('searchQuery', function (v) {
+			$rootScope.fileNameQuery = $scope.searchQuery;
+			$scope.fileNavigator.refresh();
+		});
+
+		$scope.$watch('contentType', function (v) {
+			$rootScope.contetTypeQuery = $scope.contentType;
+			$scope.fileNavigator.refresh();
+		});
+
 
         $scope.touch = function(item) {
             item = item instanceof Item ? item : new Item();
@@ -62,51 +97,63 @@
         };
 
         $scope.edit = function(item) {
-            item.edit().then(function() {
-                $scope.modal('edit', true);
-            });
+			var data = {
+				companyToken: sessionStorage.getItem('company'),
+				parentId: $rootScope.parentId,
+				startDate: null,
+				endDate: null,
+				fileName: "",
+				contentType: "",
+        		contentId: $scope.contentId
+			};
+			var error = false;
+
+			$http.post(fileManagerConfig.listUrl, data).success(function(data) {
+
+				if (!error) {
+					item.edit().then(function () {
+						$scope.modal('edit', true);
+					});
+				}
+			});
         };
 
-        $scope.changePermissions = function(item) {
-            item.changePermissions().then(function() {
-                $scope.modal('changepermissions', true);
-            });
-        };
+        $scope.move = function(item) {
+			var data = {
+				companyToken: sessionStorage.getItem('company'),
+				parentId: $rootScope.parentIdChange,
+				startDate: null,
+				endDate: null,
+				fileName: "",
+				contentType: "",
+        		contentId: $scope.contentId
+			};
+			var error = false;
+			$http.post(fileManagerConfig.listUrl, data).success(function(data) {
+				for(var y = 0; y < data.length; y++){
+					if(data[y].name == item.tempModel.name){
+						error = true;
+						$scope.temp.error = "A pasta de destino contém um arquivo com o mesmo nome.";
+						//item.error = $translate.instant('error_invalid_filename');
+					}
+				}
 
-        $scope.copy = function(item) {
-            var samePath = item.tempModel.path.join() === item.model.path.join();
-            if (samePath && $scope.fileNavigator.fileNameExists(item.tempModel.name)) {
-                item.error = $translate.instant('error_invalid_filename');
-                return false;
-            }
-            item.copy().then(function() {
-                $scope.fileNavigator.refresh();
-                $scope.modal('copy', true);
-            });
-        };
+				if(!error){
+					var samePath = item.tempModel.path.join() === item.model.path.join();
+					if (samePath && $scope.fileNavigator.fileNameExists(item.tempModel.name)) {
+						item.error = "Nome de arquivo inválido";
+						//item.error = $translate.instant('error_invalid_filename');
+						return false;
+					}
+					item.move().then(function() {
+						$scope.fileNavigator.refresh();
+						$scope.modal('move', true);
+					});
+				}
+			});
 
-        $scope.compress = function(item) {
-            item.compress().then(function() {
-                $scope.fileNavigator.refresh();
-                if (! $scope.config.compressAsync) {
-                    return $scope.modal('compress', true);
-                }
-                item.asyncSuccess = true;
-            }, function() {
-                item.asyncSuccess = false;
-            });
-        };
 
-        $scope.extract = function(item) {
-            item.extract().then(function() {
-                $scope.fileNavigator.refresh();
-                if (! $scope.config.extractAsync) {
-                    return $scope.modal('extract', true);
-                }
-                item.asyncSuccess = true;
-            }, function() {
-                item.asyncSuccess = false;
-            });
+
         };
 
         $scope.remove = function(item) {
@@ -116,41 +163,73 @@
             });
         };
 
-        $scope.rename = function(item) {
+        /*$scope.rename = function(item) {
             var samePath = item.tempModel.path.join() === item.model.path.join();
             if (samePath && $scope.fileNavigator.fileNameExists(item.tempModel.name)) {
-                item.error = $translate.instant('error_invalid_filename');
+                item.error = "Nome de arquivo inválido";
+				//item.error = $translate.instant('error_invalid_filename');
                 return false;
             }
             item.rename().then(function() {
                 $scope.fileNavigator.refresh();
                 $scope.modal('rename', true);
             });
-        };
+        };*/
 
         $scope.createFolder = function(item) {
             var name = item.tempModel.name && item.tempModel.name.trim();
             item.tempModel.type = 'dir';
             item.tempModel.path = $scope.fileNavigator.currentPath;
-            if (name && !$scope.fileNavigator.fileNameExists(name)) {
-                item.createFolder().then(function() {
-                    $scope.fileNavigator.refresh();
-                    $scope.modal('newfolder', true);
-                });
-            } else {
-                $scope.temp.error = $translate.instant('error_invalid_filename');
-                return false;
-            }
+
+			var error = false;
+
+			for(var y = 0; y < $rootScope.listFiles.length; y++){
+				if($rootScope.listFiles[y].name == name){
+					error = true;
+					$scope.temp.error = "Não é permitido pasta com mesmo nome na mesma pasta: "+name;
+					//item.error = $translate.instant('error_invalid_filename');
+				}
+			}
+            if(!error){
+				if (name && !$scope.fileNavigator.fileNameExists(name)) {
+					item.createFolder().then(function() {
+						$scope.fileNavigator.refresh();
+						$scope.modal('newfolder', true);
+					});
+				} else {
+					$scope.temp.error = "Nome de diretório inválido";
+					//item.error = $translate.instant('error_invalid_filename');
+					return false;
+				}
+			}
+
         };
 
-        $scope.uploadFiles = function() {
-            $scope.fileUploader.upload($scope.uploadFileList, $scope.fileNavigator.currentPath).then(function() {
-                $scope.fileNavigator.refresh();
-                $scope.modal('uploadfile', true);
-            }, function(data) {
-                var errorMsg = data.result && data.result.error || $translate.instant('error_uploading_files');
-                $scope.temp.error = errorMsg;
-            });
+        $scope.uploadFiles = function(item) {
+			var error = false;
+			var fileNameError = "";
+			for(var x = 0; x <  $scope.uploadFileList.length; x++){
+				for(var y = 0; y < $rootScope.listFiles.length; y++){
+					if($rootScope.listFiles[y].name == $scope.uploadFileList[x].name){
+						error = true;
+						fileNameError += " " +$rootScope.listFiles[y].name;
+					}
+				}
+			}
+			if(!error){
+				$scope.fileUploader.upload($scope.uploadFileList, $rootScope.fullPath, item).then(function() {
+					$scope.fileNavigator.refresh();
+					$scope.modal('uploadfile', true);
+				}, function(data) {
+					var errorMsg = data.result && data.result.error || 'Erro ao fazer upload do arquivo';
+					//var errorMsg = data.result && data.result.error || $translate.instant('error_uploading_files');
+					$scope.temp.error = errorMsg;
+				});
+			}else{
+				$scope.temp.error = "Não é permitido arquivos com mesmo nome na mesma pasta: "+fileNameError;
+				//item.error = $translate.instant('error_invalid_filename');
+			}
+
         };
 
         $scope.getQueryParam = function(param) {
@@ -164,7 +243,7 @@
             return found;
         };
 
-        $scope.changeLanguage($scope.getQueryParam('lang'));
+		//$scope.changeLanguage($scope.getQueryParam('lang'));
         $scope.isWindows = $scope.getQueryParam('server') === 'Windows';
         $scope.fileNavigator.refresh();
     }]);

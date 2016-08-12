@@ -1,11 +1,24 @@
+<link href="css/custom.css" rel="stylesheet" />
+
 <div ng-controller="FileManagerCtrl">
-    <div ng-include="config.tplPath + '/navbar.html'"></div>
+	<div class="card">
+		<div class="card-body card-padding">
+			<div class="row">
+					<div class="col-xs-12">
+						<div class="form-group fg-float m-b-20">
+							<div class="fg-line">
+								<input class="form-control" type="text" ng-model="searchQuery"/>
+								<label class="fg-label">Buscar por nome</label>
+							</div>
+						</div>
+					</div>
+			</div>
+		</div>
+	</div>
 
-    <div class="container-fluid">
+	<div class="box">
         <div class="row">
-
-            <div class="col-sm-3 col-md-2 sidebar file-tree animated slow fadeIn" ng-include="config.tplPath + '/sidebar.html'" ng-show="config.sidebar && fileNavigator.history[0]"></div>
-            <div class="main" ng-class="config.sidebar && fileNavigator.history[0] && 'col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2'">
+            <div class="main" ng-class="config.sidebar && fileNavigator.history[0] && 'col-sm-12 col-md-12'">
                 <div ng-include="config.tplPath + '/current-folder-breadcrumb.html'" ng-show="config.breadcrumb"></div>
                 <div ng-include="config.tplPath + '/' + viewTemplate" class="main-navigation clearfix"></div>
             </div>

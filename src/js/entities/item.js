@@ -1,35 +1,53 @@
 (function(window, angular, $) {
     "use strict";
-    angular.module('FileManagerApp').factory('item', ['$http', '$q', '$translate', 'fileManagerConfig', 'chmod', function($http, $q, $translate, fileManagerConfig, Chmod) {
+    angular.module('FileManagerApp').factory('item', ['$http', '$q', '$translate', 'fileManagerConfig', '$rootScope', function($http, $q, $translate, fileManagerConfig, $rootScope) {
 
         var Item = function(model, path) {
             var rawModel = {
-                name: model && model.name || '',
+                name: model && model.Name || '',
                 path: path || [],
-                type: model && model.type || 'file',
-                size: model && parseInt(model.size || 0),
-                date: parseMySQLDate(model && model.date),
-                perms: new Chmod(model && model.rights),
+                type: typeFile(model && model.Name, model && model.Type),
+                size: model && parseInt(model.Size || 0),
+                date: parseDateDDmmAAAA(model && model.Date),
+                perms: model && model.rights,
                 content: model && model.content || '',
                 recursive: false,
                 sizeKb: function() {
-                    return Math.round(this.size / 1024, 1);
+                    return Math.round(this.Size / 1024, 1);
                 },
                 fullPath: function() {
                     return ('/' + this.path.join('/') + '/' + this.name).replace(/\/\//, '/');
-                }
-            };
+                },
+				        parentId: model && model.ParentId || '',
+				        id: model && model.Id || ''
+              };
 
-            this.error = '';
-            this.inprocess = false;
+              this.error = '';
+              this.inprocess = false;
 
-            this.model = angular.copy(rawModel);
-            this.tempModel = angular.copy(rawModel);
+              this.model = angular.copy(rawModel);
+              this.tempModel = angular.copy(rawModel);
 
-            function parseMySQLDate(mysqlDate) {
-                var d = (mysqlDate || '').toString().split(/[- :]/);
-                return new Date(d[0], d[1] - 1, d[2], d[3], d[4], d[5]);
-            }
+
+
+        function parseDateDDmmAAAA(mysqlDate) {
+            var d = (mysqlDate || '').toString().split(/[/ :]/);
+				    var retorno = '';
+    				if(d[0] != undefined && d[1] != undefined && d[2] != undefined){
+    					retorno = d[0]+"/"+d[1]+"/"+d[2];
+    				}
+            return retorno;
+        }
+
+			function typeFile(fileName, type){
+				var retorno = 'dir';
+				var t = (fileName || '').toString().split('.');
+				if(type != 'dir'){
+					retorno = t[t.length - 1];
+				}
+
+				return retorno;
+			}
         };
 
         Item.prototype.update = function() {
@@ -61,211 +79,160 @@
             return deferred.resolve(data);
         };
 
+        var contentId = window.location.href.split("documents/")[1];
+
         Item.prototype.createFolder = function() {
             var self = this;
             var deferred = $q.defer();
-            var data = {params: {
-                mode: "addfolder",
-                path: self.tempModel.path.join('/'),
-                name: self.tempModel.name
-            }};
+            var data = {
+			    //companyToken: sessionStorage.getItem('company'),
+                parentId: $rootScope.parentId,
+                fileName: self.tempModel.name,
+                contentId: contentId
+            };
 
             self.inprocess = true;
             self.error = '';
             $http.post(fileManagerConfig.createFolderUrl, data).success(function(data) {
                 self.deferredHandler(data, deferred);
             }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_creating_folder'));
+                self.deferredHandler(data, deferred, 'erro ao criar o diretório');
+                //self.deferredHandler(data, deferred, $translate.instant('error_creating_folder'));
             })['finally'](function(data) {
                 self.inprocess = false;
             });
-        
+
             return deferred.promise;
         };
 
-        Item.prototype.rename = function() {
+        Item.prototype.move = function() {
             var self = this;
             var deferred = $q.defer();
-            var data = {params: {
-                "mode": "rename",
-                "path": self.model.fullPath(),
-                "newPath": self.tempModel.fullPath()
-            }};
+
+			var fullPath = self.model.fullPath();
+			fullPath = fullPath.replace(new RegExp('/', 'g'), '|');
+
+			var destinationFullPath = self.tempModel.path.join('/');
+			if(destinationFullPath == undefined){
+				destinationFullPath = '';
+			}
+			destinationFullPath = destinationFullPath.replace(new RegExp('/', 'g'), '|');
+
+			var dueDate = "";
+			if(self.tempModel.dueDate != undefined){
+				var d = new Date(self.tempModel.dueDate.startDate);
+				var dd = d.getDate();
+				var mm = d.getMonth()+1;
+				var yyyy = d.getFullYear();
+
+				if(dd<10){
+					dd='0'+dd
+				}
+				if(mm<10){
+					mm='0'+mm
+				}
+				var dtFormat = mm+'/'+dd+'/'+yyyy;
+
+				dueDate =  dtFormat;
+			}
+
+			var data = {
+				documentToken: self.model.downloadToken,
+				fullPath: fullPath,
+				destinationFileName: self.tempModel.name,
+				destinationFullPath: destinationFullPath,
+				parentId: $rootScope.parentIdChange
+
+			};
+
             self.inprocess = true;
             self.error = '';
             $http.post(fileManagerConfig.renameUrl, data).success(function(data) {
                 self.deferredHandler(data, deferred);
             }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_renaming'));
+                self.deferredHandler(data, deferred, "erro ao alterar");
+                //self.deferredHandler(data, deferred, $translate.instant('error_renaming'));
             })['finally'](function() {
                 self.inprocess = false;
             });
+
             return deferred.promise;
         };
 
-        Item.prototype.copy = function() {
-            var self = this;
-            var deferred = $q.defer();
-            var data = {params: {
-                mode: "copy",
-                path: self.model.fullPath(),
-                newPath: self.tempModel.fullPath()
-            }};
+		Item.prototype.edit = function() {
+			var self = this;
+			var deferred = $q.defer();
 
-            self.inprocess = true;
-            self.error = '';
-            $http.post(fileManagerConfig.copyUrl, data).success(function(data) {
-                self.deferredHandler(data, deferred);
-            }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_copying'));
-            })['finally'](function() {
-                self.inprocess = false;
-            });
-            return deferred.promise;
-        };
+			var fullPath = self.model.fullPath();
+			fullPath = fullPath.replace(new RegExp('/', 'g'), '|');
 
-        Item.prototype.compress = function() {
-            var self = this;
-            var deferred = $q.defer();
-            var data = {params: {
-                mode: "compress",
-                path: self.model.fullPath(),
-                destination: self.tempModel.fullPath()
-            }};
+			var destinationFullPath = $rootScope.fullPath;
+			if($rootScope.fullPath == undefined){
+				destinationFullPath = '';
+			}
+			destinationFullPath = destinationFullPath.replace(new RegExp('/', 'g'), '|');
 
-            self.inprocess = true;
-            self.error = '';
-            $http.post(fileManagerConfig.compressUrl, data).success(function(data) {
-                self.deferredHandler(data, deferred);
-            }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_compressing'));
-            })['finally'](function() {
-                self.inprocess = false;
-            });
-            return deferred.promise;
-        };
 
-        Item.prototype.extract = function() {
-            var self = this;
-            var deferred = $q.defer();
-            var data = {params: {
-                mode: "extract",
-                path: self.model.fullPath(),
-                sourceFile: self.model.fullPath(),
-                destination: self.tempModel.fullPath()
-            }};
+			var data = {
+				documentToken: self.model.downloadToken,
+				fullPath: fullPath,
+				destinationFileName: self.tempModel.name,
+				destinationFullPath: destinationFullPath,
+				parentId: $rootScope.parentIdChange
+			};
 
-            self.inprocess = true;
-            self.error = '';
-            $http.post(fileManagerConfig.extractUrl, data).success(function(data) {
-                self.deferredHandler(data, deferred);
-            }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_extracting'));
-            })["finally"](function() {
-                self.inprocess = false;
-            });
-            return deferred.promise;
-        };
+			self.inprocess = true;
+			self.error = '';
+			$http.post(fileManagerConfig.renameUrl, data).success(function(data) {
+				self.deferredHandler(data, deferred);
+			}).error(function(data) {
+				self.deferredHandler(data, deferred, "erro ao alterar");
+                //self.deferredHandler(data, deferred, $translate.instant('error_copying'));
+			})['finally'](function() {
+				self.inprocess = false;
+			});
+			return deferred.promise;
+		};
+        Item.prototype.download = function (options, name, callbackSuccess, callbackError) {
+                    var name = this.model.name;
+                    var promise = $http({
+                                          method: 'GET',
+                                          url: fileManagerConfig.downloadFileUrl  +'/?id=' + this.model.id + '&name=' + this.model.name,
+                                          responseType: 'arraybuffer'
+                                      }, this.model);
 
-        Item.prototype.download = function(preview) {
-            var self = this;
-            var data = {
-                mode: "download",
-                preview: preview,
-                path: self.model.fullPath()
-            };
-
-            var url = [fileManagerConfig.downloadFileUrl, $.param(data)].join('?');
-            if (self.model.type !== 'dir') {
-                window.open(url, '_blank', '');
-            }
-        };
+                        promise.success(function (data, status, headers) {
+                            fileDownload(name, data, headers);
+                          });
+                          promise.error(function (data, status) {
+                          });
+                  };
 
         Item.prototype.preview = function() {
             var self = this;
             return self.download(true);
         };
 
-        Item.prototype.getContent = function() {
+	    Item.prototype.remove = function() {
             var self = this;
             var deferred = $q.defer();
-            var data = {params: {
-                mode: "editfile",
-                path: self.tempModel.fullPath()
-            }};
 
-            self.inprocess = true;
-            self.error = '';
-            $http.post(fileManagerConfig.getContentUrl, data).success(function(data) {
-                self.tempModel.content = self.model.content = data.result;
-                self.deferredHandler(data, deferred);
-            }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_getting_content'));
-            })['finally'](function() {
-                self.inprocess = false;
-            });
-            return deferred.promise;
-        };
+			     var path = self.model.fullPath();
+			     path = path.replace(new RegExp('/', 'g'), '|');
 
-        Item.prototype.remove = function() {
-            var self = this;
-            var deferred = $q.defer();
-            var data = {params: {
-                mode: "delete",
-                path: self.tempModel.fullPath()
-            }};
+
+            var data = {
+                id: self.model.id,
+                fullPath: path
+            };
 
             self.inprocess = true;
             self.error = '';
             $http.post(fileManagerConfig.removeUrl, data).success(function(data) {
                 self.deferredHandler(data, deferred);
             }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_deleting'));
-            })['finally'](function() {
-                self.inprocess = false;
-            });
-            return deferred.promise;
-        };
-
-        Item.prototype.edit = function() {
-            var self = this;
-            var deferred = $q.defer();
-            var data = {params: {
-                mode: "savefile",
-                content: self.tempModel.content,
-                path: self.tempModel.fullPath()
-            }};
-
-            self.inprocess = true;
-            self.error = '';
-
-            $http.post(fileManagerConfig.editUrl, data).success(function(data) {
-                self.deferredHandler(data, deferred);
-            }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_modifying'));
-            })['finally'](function() {
-                self.inprocess = false;
-            });
-            return deferred.promise;
-        };
-
-        Item.prototype.changePermissions = function() {
-            var self = this;
-            var deferred = $q.defer();
-            var data = {params: {
-                mode: "changepermissions",
-                path: self.tempModel.fullPath(),
-                perms: self.tempModel.perms.toOctal(),
-                permsCode: self.tempModel.perms.toCode(),
-                recursive: self.tempModel.recursive
-            }};
-            
-            self.inprocess = true;
-            self.error = '';
-            $http.post(fileManagerConfig.permissionsUrl, data).success(function(data) {
-                self.deferredHandler(data, deferred);
-            }).error(function(data) {
-                self.deferredHandler(data, deferred, $translate.instant('error_changing_perms'));
+                self.deferredHandler(data, deferred, "erro ao deletar");
+                //self.deferredHandler(data, deferred, $translate.instant('error_extracting'));
             })['finally'](function() {
                 self.inprocess = false;
             });
@@ -277,20 +244,19 @@
         };
 
         Item.prototype.isEditable = function() {
-            return !this.isFolder() && fileManagerConfig.isEditableFilePattern.test(this.model.name);
+			return !this.isFolder() && fileManagerConfig.isEditableFilePattern.test(this.model.name);
+
         };
 
         Item.prototype.isImage = function() {
             return fileManagerConfig.isImageFilePattern.test(this.model.name);
         };
 
-        Item.prototype.isCompressible = function() {
-            return this.isFolder();
-        };
+		Item.prototype.isViewable = function() {
+			return fileManagerConfig.isViewableFilePattern.test(this.model.name);
+		};
 
-        Item.prototype.isExtractable = function() {
-            return !this.isFolder() && fileManagerConfig.isExtractableFilePattern.test(this.model.name);
-        };
+
 
         return Item;
     }]);
