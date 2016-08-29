@@ -8,9 +8,6 @@
 			 ng-style="style">
 		</div>
 
-
-
-
     <tbody class="file-item">
 
         <tr ng-show="fileNavigator.requesting">
@@ -26,7 +23,7 @@
         </tr>
         <tr ng-repeat="item in fileNavigator.fileList | filter: query | orderBy:predicate:reverse" ng-show="!fileNavigator.requesting">
             <td ng-right-click="touch(item)">
-                <a href="" ng-click="smartClick(item)" title="{{item.model.name}} ({{item.model.sizeKb()}}kb)">
+                <a href="" ng-click="smartClick(item)" title="{{item.model.name}} ({{item.model.sizeKb()}})">
                     <i class="icon-folder" ng-show="item.model.type == 'dir'"></i>
                     <i class="fa fa-file-picture-o" ng-show="item.model.type == 'jpg' || item.model.type == 'png' || item.model.type == 'gif'"></i>
 					<i class="fa fa-file-pdf-o" ng-show="item.model.type == 'pdf'"></i>
@@ -44,20 +41,8 @@
 																					item.model.type != 'xls'"></i>
                    <span class="title-black"> {{item.model.name | strLimit : 64}} </span>
                 </a>
-								<small class="help-block">Criado em: {{item.model.date}}</small>
+								<small class="help-block">{{"creation_date" | translate}} {{item.model.date}}</small>
             </td>
-            <!--<td class="hidden-xs text-center">
-                {{item.model.type}}
-            </td>
-            <td class="hidden-sm hidden-xs text-center">
-				{{item.model.date}}
-            </td>
-			<td class="hidden-sm hidden-xs text-center">
-				{{item.model.referenceDate}}
-			</td>
-			<td class="hidden-sm hidden-xs">
-				{{item.model.dueDate.startDate | date: 'dd/MM/yyyy'}}
-			</td>-->
 			<td class="hidden-sm hidden-xs" align="right">
 				<div ng-show="item.model.type != 'dir' && item.model.value > 0">{{item.model.value | number:2}}</div>
 			</td>

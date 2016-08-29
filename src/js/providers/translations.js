@@ -34,6 +34,7 @@
             search: "Search",
             create_folder: "Create folder",
             create: "Create",
+            creation_date: "Created at:",
             folder_name: "Folder name",
             upload: "Upload",
             change_permissions: "Change permissions",
@@ -79,15 +80,17 @@
             exec: "Exec",
             original: "Original",
             changes: "Changes",
-            recursive: "Recursive"
+            recursive: "Recursive",
+            root_folder: "Root folder",
+            up_one_level: "Up one level"
         });
 
         $translateProvider.translations('pt', {
             filemanager: "Gerenciador de arquivos",
-            language: "Língua",
+            language: "Idioma",
             english: "Inglês",
             spanish: "Espanhol",
-            portuguese: "Portugues",
+            portuguese: "Português",
             french: "Francês",
             confirm: "Confirmar",
             cancel: "Cancelar",
@@ -113,14 +116,15 @@
             file_content: "Conteúdo do arquivo",
             loading: "Carregando",
             search: "Localizar",
-            create_folder: "Criar Pasta",
+            create_folder: "Nova Pasta",
             create: "Criar",
+            creation_date: "Criado em:",
             folder_name: "Nome da pasta",
-            upload: "Fazer",
+            upload: "Upload de arquivo",
             change_permissions: "Alterar permissões",
             change: "Alterar",
             details: "Detalhes",
-            icons: "Icones",
+            icons: "Ícones",
             list: "Lista",
             name: "Nome",
             size: "Tamanho",
@@ -133,7 +137,7 @@
             wait: "Espere",
             move: "Mover",
             download: "Baixar",
-            view_item: "Veja o arquivo",
+            view_item: "Visualizar",
             remove: "Excluir",
             edit: "Editar",
             copy: "Copiar",
@@ -160,7 +164,9 @@
             exec: "Execução",
             original: "Original",
             changes: "Mudanças",
-            recursive: "Recursiva"
+            recursive: "Recursiva",
+            root_folder: "Pasta raiz",
+            up_one_level: "Subir um nível"
         });
 
         $translateProvider.translations('es', {
@@ -196,6 +202,7 @@
             search: "Buscar",
             create_folder: "Crear carpeta",
             create: "Crear",
+            creation_date: "Creado en:",
             folder_name: "Nombre de la carpeta",
             upload: "Subir",
             change_permissions: "Cambiar permisos",
@@ -241,7 +248,9 @@
             exec: "Ejecucion",
             original: "Original",
             changes: "Cambios",
-            recursive: "Recursivo"
+            recursive: "Recursivo",
+            root_folder: "Carpeta raíz",
+            up_one_level: "Un nivel arriba"
         });
         $translateProvider.translations('fr', {
             filemanager: "Gestionnaire de fichier",
@@ -276,6 +285,7 @@
             search: "Recherche",
             create_folder: "Créer un dossier",
             create: "Créer",
+            creation_date: "Créé à:",
             folder_name: "Nom du dossier",
             upload: "Upload",
             change_permissions: "Changer les permissions",
@@ -321,7 +331,9 @@
             exec: "Éxécution",
             original: "Original",
             changes: "Modifications",
-            recursive: "Récursif"
+            recursive: "Récursif",
+            root_folder: "Dossier racine",
+            up_one_level: "Remonter d’un niveau"
         });
 
         $translateProvider.preferredLanguage('pt');

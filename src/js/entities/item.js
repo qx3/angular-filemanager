@@ -13,7 +13,11 @@
                 content: model && model.content || '',
                 recursive: false,
                 sizeKb: function() {
-                    return Math.round(this.Size / 1024, 1);
+                    if (this.type == "dir") {
+                        return "Pasta";
+                    } else {
+                        return Math.round(this.size / 1024, 1) + "kb";
+                    }
                 },
                 fullPath: function() {
                     return ('/' + this.path.join('/') + '/' + this.name).replace(/\/\//, '/');

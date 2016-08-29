@@ -1,34 +1,38 @@
 <ol class="breadcrumb mb0">
   <!-- folder icon and path -->
     <li>
-        <a href="" ng-click="fileNavigator.goTo(-1)">
+        <a href="javascript:" ng-click="fileNavigator.goTo(-1)" title="{{'root_folder' | translate}}">
             <!--<i class="fa fa-folder-open mr2"></i>-->
             <i class="icon-folder_open"></i>
         </a>
     </li>
     <li ng-repeat="(key, dir) in fileNavigator.currentPath track by key" ng-class="{'active':$last}" class="animated fast fadeIn">
-        <a href="" ng-show="!$last" ng-click="fileNavigator.goTo(key)">
+        <a href="javascript:" ng-show="!$last" ng-click="fileNavigator.goTo(key)">
             {{dir}}
         </a>
         <span ng-show="$last">{{dir}}</span>
     </li>
-    <li><i class="" ng-click="fileNavigator.upDir()">&crarr;</i></li>
+    <li>
+        <a href="javascript:" ng-click="fileNavigator.upDir()" title="{{'up_one_level' | translate}}">
+            <i class="">&crarr;</i>
+        </a>
+    </li>
 
 	<span class="pull-right">
 
 		<button class="btn btn-primary btn-sm bgm-red" data-toggle="modal" data-target="#uploadfile" ng-click="touch()">
-			<!--<i class="fa fa-cloud-upload"></i>--> Upload de Arquivo
+			<!--<i class="fa fa-cloud-upload"></i>--> {{'upload' | translate}}
 		</button>
 
 		<button class="btn btn-primary btn-sm bgm-red" data-toggle="modal" data-target="#newfolder" ng-click="touch()">
-			<!--<i class="fa fa-folder-o"></i>--> Nova pasta
+			<!--<i class="fa fa-folder-o"></i>--> {{'create_folder' | translate}}
 		</button>
     <!-- visão de arquivos, em vez de lista -->
-		<button class="btn btn-default btn-sm" ng-click="$parent.setTemplate('main-icons.html')" ng-show="$parent.viewTemplate !== 'main-icons.html'" title="Ícones">
+		<button class="btn btn-default btn-sm" ng-click="$parent.setTemplate('main-icons.html')" ng-show="$parent.viewTemplate !== 'main-icons.html'" title="{{'icons' | translate}}">
 			<i class="glyphicon glyphicon-th-large"></i>
 		</button>
 
-		<button class="btn btn-default btn-sm" ng-click="$parent.setTemplate('main-table.html')" ng-show="$parent.viewTemplate !== 'main-table.html'" title="Lista">
+		<button class="btn btn-default btn-sm" ng-click="$parent.setTemplate('main-table.html')" ng-show="$parent.viewTemplate !== 'main-table.html'" title="{{'list' | translate}}">
 			<i class="glyphicon glyphicon-th-list"></i>
 		</button>
 	</span>

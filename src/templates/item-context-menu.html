@@ -1,10 +1,10 @@
 <div id="context-menu" class="dropdown-file clearfix animated fast fadeIn">
     <ul class="dropdown-menu dropdown-right-click" role="menu" aria-labelledby="dropdownMenu" style="">
-		<li ng-show="temp.tempModel.type != 'dir'"><a href="" tabindex="-1" ng-click="temp.download()"><i class="glyphicon glyphicon-download"></i> Download</a></li>
-		<li ng-show="temp.isViewable()"><a href="" tabindex="-1" ng-click="temp.preview()"><i class="glyphicon glyphicon-picture"></i> Visualizar</a></li>
+		<li ng-show="temp.tempModel.type != 'dir'"><a href="" tabindex="-1" ng-click="temp.download()"><i class="glyphicon glyphicon-download"></i> {{'download' | translate}}</a></li>
+		<li ng-show="temp.isViewable()"><a href="" tabindex="-1" ng-click="temp.preview()"><i class="glyphicon glyphicon-picture"></i> {{'view_item' | translate}}</a></li>
 
         <li ng-show="temp.tempModel.perms == 'A' && temp.tempModel.type != 'dir'"><a href="" tabindex="-1" data-toggle="modal" data-target="#edit"><i class="glyphicon glyphicon-edit"></i> {{'edit' | translate}}</a></li>
-        <li ng-show="temp.tempModel.perms == 'A' && !temp.isFolder()"><a href="" tabindex="-1" data-toggle="modal" data-target="#move"><i class="glyphicon glyphicon-log-out"></i> Mover</a></li>
+        <li ng-show="temp.tempModel.perms == 'A' && !temp.isFolder()"><a href="" tabindex="-1" data-toggle="modal" data-target="#move"><i class="glyphicon glyphicon-log-out"></i> {{'move' | translate}}</a></li>
 
         <li><a href="" tabindex="-1" data-toggle="modal" data-target="#delete"><i class="glyphicon glyphicon-trash"></i> {{'remove' | translate}}</a></li>
     </ul>

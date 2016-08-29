@@ -1,6 +1,6 @@
 <div class="iconset clearfix">
     <div class="col-sm-1" ng-repeat="item in fileNavigator.fileList | filter: query | orderBy: orderProp" ng-show="!fileNavigator.requesting && !fileNavigator.error">
-        <a href="" class="text-left" ng-click="smartClick(item)" ng-right-click="touch(item)" title="{{item.model.name}} ({{item.model.sizeKb()}}kb)">
+        <a href="" class="text-left" ng-click="smartClick(item)" ng-right-click="touch(item)" title="{{item.model.name}} ({{item.model.sizeKb()}})">
             <div class="item-icon">
 				<i class="fa fa-fw fa-folder" ng-show="item.model.type === 'dir'"></i>
 				<i class="fa fa-file-picture-o" ng-show="item.model.type == 'jpg' || item.model.type == 'png'"></i>
