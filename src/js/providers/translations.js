@@ -323,5 +323,7 @@
             changes: "Modifications",
             recursive: "Récursif"
         });
+
+        $translateProvider.preferredLanguage('pt');
     }]);
 })(angular);

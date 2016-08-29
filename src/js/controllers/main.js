@@ -24,32 +24,14 @@
             $scope.viewTemplate = $cookies.viewTemplate = name;
         };
 
-		/*$scope.changeLanguage = function (locale) {
+		$scope.changeLanguage = function (locale) {
             if (locale) {
                 return $translate.use($cookies.language = locale);
             }
             $translate.use($cookies.language || fileManagerConfig.defaultLang);
-        };*/
+        };
 
         $scope.contentId = window.location.href.split("documents/")[1];
-		//combo de mes e ano
-		$scope.referenceYears = [];
-		$scope.referenceMonths = [];
-
-		for (var i = 0; i < 10; i++) {
-			var year = (new Date()).getFullYear();
-			year += i;
-			$scope.referenceYears.push(year);
-		};
-
-		for (var i = 1; i <= 12; i++) {
-			var m = {
-				month: i,
-				label: i < 10 ? ('0' + i.toString()) : i.toString()
-			};
-			$scope.referenceMonths.push(m);
-		}
-		//fim combo mes e ano
 
 		$scope.$watch('datePickers', function (v) {
 			$rootScope.dtPickersQuery = $scope.datePickers;

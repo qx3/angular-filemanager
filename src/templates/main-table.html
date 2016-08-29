@@ -7,7 +7,12 @@
 		<div flow-drag-enter="style={border:'4px solid green'}" flow-drag-leave="style={}"
 			 ng-style="style">
 		</div>
+
+
+
+
     <tbody class="file-item">
+
         <tr ng-show="fileNavigator.requesting">
             <td colspan="5">
                 <div ng-include="config.tplPath + '/spinner.html'"></div>
@@ -60,6 +65,7 @@
 				<i class="fa fa-lock text-success"  ng-show="item.model.perms == 'D'"></i>
 				<i class="fa fa-unlock-alt text-success"  ng-show="item.model.perms == 'A'"></i>
 			</td>
+
             <td class="text-right">
                 <div ng-include="config.tplPath + '/item-toolbar.html'"></div>
 			</td>

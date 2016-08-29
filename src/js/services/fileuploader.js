@@ -38,7 +38,7 @@
 			if(item.tempModel.dueDate != undefined){
 				var d = new Date(item.tempModel.dueDate.startDate);
 				var dd = d.getDate();
-				var mm = d.getMonth()+1; //January is 0!
+				var mm = d.getMonth()+1;
 				var yyyy = d.getFullYear();
 
 				if(dd<10){
