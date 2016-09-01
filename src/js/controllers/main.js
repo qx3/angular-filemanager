@@ -31,8 +31,6 @@
             $translate.use($cookies.language || fileManagerConfig.defaultLang);
         };
 
-        $scope.contentId = window.location.href.split("documents/")[1];
-
 		$scope.$watch('datePickers', function (v) {
 			$rootScope.dtPickersQuery = $scope.datePickers;
 			$scope.fileNavigator.refresh();
@@ -80,13 +78,12 @@
 
         $scope.edit = function(item) {
 			var data = {
-				companyToken: sessionStorage.getItem('company'),
 				parentId: $rootScope.parentId,
 				startDate: null,
 				endDate: null,
 				fileName: "",
 				contentType: "",
-        		contentId: $scope.contentId
+        		contentId: $rootScope.contentId
 			};
 			var error = false;
 
@@ -102,13 +99,12 @@
 
         $scope.move = function(item) {
 			var data = {
-				companyToken: sessionStorage.getItem('company'),
 				parentId: $rootScope.parentIdChange,
 				startDate: null,
 				endDate: null,
 				fileName: "",
 				contentType: "",
-        		contentId: $scope.contentId
+        		contentId: $rootScope.contentId
 			};
 			var error = false;
 			$http.post(fileManagerConfig.listUrl, data).success(function(data) {
@@ -225,7 +221,7 @@
             return found;
         };
 
-		//$scope.changeLanguage($scope.getQueryParam('lang'));
+		$scope.changeLanguage($scope.getQueryParam('lang'));
         $scope.isWindows = $scope.getQueryParam('server') === 'Windows';
         $scope.fileNavigator.refresh();
     }]);

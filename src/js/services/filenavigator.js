@@ -6,16 +6,15 @@
         $http.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
         var FileNavigator = function() {
-            this.requesting = false;
-            this.fileList = [];
-            this.currentPath = [];
-            this.history = [];
-            this.error = '';
+                this.requesting = false;
+                this.fileList = [];
+                this.currentPath = [];
+                this.history = [];
+                this.error = '';
       			this.parentId = '';
       			this.id = '';
       			this.folderInfo = [];
         };
-
 
         FileNavigator.prototype.deferredHandler = function(data, deferred, defaultMsg) {
 
@@ -39,25 +38,24 @@
 
 
 
-        FileNavigator.prototype.list = function() {
+        FileNavigator.prototype.list = function(item) {
 
-          var contentId = window.location.href.split("documents/")[1];
-          var self = this;
-          var deferred = $q.defer();
-          var path = self.currentPath.join('/');
-    			var parentId = null;
-    			var startDate = null;
-    			var endDate = null;
-    			var fileName = "";
-    			var contentType = "";
+            var contentId = $rootScope.contentId;
+            var self = this;
+            var deferred = $q.defer();
+            var path = self.currentPath.join('/');
+            var parentId = null;
+            var startDate = null;
+            var endDate = null;
+            var fileName = "";
+            var contentType = "";
 
-  			  if($rootScope.parentId != undefined && $rootScope.parentId != ""){
-  				    parentId = $rootScope.parentId;
-    			}
-          else
-          {
-    				  self.currentPath = [];
-    			}
+            if($rootScope.parentId != undefined && $rootScope.parentId != ""){
+                parentId = $rootScope.parentId;
+            }
+            else {
+                self.currentPath = [];
+            }
 
 			if($rootScope.dtPickersQuery != null){
 				startDate = $rootScope.dtPickersQuery.startDate;
@@ -72,13 +70,12 @@
 			}
 
 			var data = {
-    				companyToken: sessionStorage.getItem('company'),
     				parentId: parentId,
     				startDate: startDate,
     				endDate: endDate,
     				fileName: fileName,
     				contentType: contentType,
-            contentId: contentId
+                    contentId: contentId
             };
 
             self.requesting = true;
@@ -86,9 +83,7 @@
             self.error = '';
 
             $http.post(fileManagerConfig.listUrl, data).success(function(data) {
-
-				        $rootScope.listFiles = data;
-
+                $rootScope.listFiles = data;
                 self.deferredHandler(data, deferred);
             }).error(function(data) {
                 self.deferredHandler(data, deferred, 'Unknown error listing, check the response');
@@ -144,11 +139,11 @@
             var self = this;
             self.currentPath = [];
             if (item && item.isFolder()) {
-      				self.currentPath = item.model.fullPath().split('/').splice(1);
-              self.id = item.model.id;
-      				self.folderInfo.push({id: item.model.id, folder: item.model.name});
-      				$rootScope.parentId = self.id;
-      				$rootScope.fullPath = item.model.fullPath();
+                self.currentPath = item.model.fullPath().split('/').splice(1);
+                self.id = item.model.id;
+                self.folderInfo.push({id: item.model.id, folder: item.model.name});
+                $rootScope.parentId = self.id;
+                $rootScope.fullPath = item.model.fullPath();
             }
             self.refresh();
         };
@@ -187,7 +182,7 @@
 			}
 			$rootScope.fullPath = self.currentPath.join('/');
 			$rootScope.parentId = self.id;
-
+            
             self.refresh();
         };
 

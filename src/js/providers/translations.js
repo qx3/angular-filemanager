@@ -335,7 +335,5 @@
             root_folder: "Dossier racine",
             up_one_level: "Remonter d’un niveau"
         });
-
-        $translateProvider.preferredLanguage('pt');
     }]);
 })(angular);

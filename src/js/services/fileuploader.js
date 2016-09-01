@@ -27,7 +27,6 @@
             var form = new window.FormData();
             var deferred = $q.defer();
 
-			form.append('companyToken', sessionStorage.getItem('company'));
 			if(path != undefined){
 				form.append('fullPath', path);
 			}

@@ -22,26 +22,24 @@
                 fullPath: function() {
                     return ('/' + this.path.join('/') + '/' + this.name).replace(/\/\//, '/');
                 },
-				        parentId: model && model.ParentId || '',
-				        id: model && model.Id || ''
-              };
+                parentId: model && model.ParentId || '',
+                id: model && model.Id || ''
+            };
 
-              this.error = '';
-              this.inprocess = false;
+            this.error = '';
+            this.inprocess = false;
 
-              this.model = angular.copy(rawModel);
-              this.tempModel = angular.copy(rawModel);
+            this.model = angular.copy(rawModel);
+            this.tempModel = angular.copy(rawModel);
 
-
-
-        function parseDateDDmmAAAA(mysqlDate) {
-            var d = (mysqlDate || '').toString().split(/[/ :]/);
-				    var retorno = '';
-    				if(d[0] != undefined && d[1] != undefined && d[2] != undefined){
-    					retorno = d[0]+"/"+d[1]+"/"+d[2];
-    				}
-            return retorno;
-        }
+            function parseDateDDmmAAAA(mysqlDate) {
+                var d = (mysqlDate || '').toString().split(/[/ :]/);
+                        var retorno = '';
+                        if(d[0] != undefined && d[1] != undefined && d[2] != undefined){
+                            retorno = d[0]+"/"+d[1]+"/"+d[2];
+                        }
+                return retorno;
+            }
 
 			function typeFile(fileName, type){
 				var retorno = 'dir';
@@ -82,17 +80,14 @@
             this.update();
             return deferred.resolve(data);
         };
-
-        var contentId = window.location.href.split("documents/")[1];
-
+        
         Item.prototype.createFolder = function() {
             var self = this;
             var deferred = $q.defer();
             var data = {
-			    //companyToken: sessionStorage.getItem('company'),
                 parentId: $rootScope.parentId,
                 fileName: self.tempModel.name,
-                contentId: contentId
+                contentId: $rootScope.contentId
             };
 
             self.inprocess = true;
@@ -176,7 +171,6 @@
 			}
 			destinationFullPath = destinationFullPath.replace(new RegExp('/', 'g'), '|');
 
-
 			var data = {
 				documentToken: self.model.downloadToken,
 				fullPath: fullPath,
@@ -198,19 +192,18 @@
 			return deferred.promise;
 		};
         Item.prototype.download = function (options, name, callbackSuccess, callbackError) {
-                    var name = this.model.name;
-                    var promise = $http({
-                                          method: 'GET',
-                                          url: fileManagerConfig.downloadFileUrl  +'/?id=' + this.model.id + '&name=' + this.model.name,
-                                          responseType: 'arraybuffer'
-                                      }, this.model);
+            var name = this.model.name;
+            var promise = $http({
+                            method: 'GET',
+                            url: fileManagerConfig.downloadFileUrl  +'/?id=' + this.model.id + '&name=' + this.model.name,
+                            responseType: 'arraybuffer'
+                        }, this.model);
 
-                        promise.success(function (data, status, headers) {
-                            fileDownload(name, data, headers);
-                          });
-                          promise.error(function (data, status) {
-                          });
-                  };
+            promise.success(function (data, status, headers) {
+                fileDownload(name, data, headers);
+            });
+            promise.error(function (data, status) {});
+        };
 
         Item.prototype.preview = function() {
             var self = this;
@@ -221,9 +214,8 @@
             var self = this;
             var deferred = $q.defer();
 
-			     var path = self.model.fullPath();
-			     path = path.replace(new RegExp('/', 'g'), '|');
-
+            var path = self.model.fullPath();
+            path = path.replace(new RegExp('/', 'g'), '|');
 
             var data = {
                 id: self.model.id,
@@ -259,8 +251,6 @@
 		Item.prototype.isViewable = function() {
 			return fileManagerConfig.isViewableFilePattern.test(this.model.name);
 		};
-
-
 
         return Item;
     }]);
