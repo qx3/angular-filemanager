@@ -57,11 +57,6 @@
                 self.currentPath = [];
             }
 
-			if($rootScope.dtPickersQuery != null){
-				startDate = $rootScope.dtPickersQuery.startDate;
-				endDate = $rootScope.dtPickersQuery.endDate;
-			}
-
 			if($rootScope.fileNameQuery != undefined){
 				fileName = $rootScope.fileNameQuery;
 			}

@@ -31,11 +31,6 @@
             $translate.use($cookies.language || fileManagerConfig.defaultLang);
         };
 
-		$scope.$watch('datePickers', function (v) {
-			$rootScope.dtPickersQuery = $scope.datePickers;
-			$scope.fileNavigator.refresh();
-		});
-
 		$scope.$watch('searchQuery', function (v) {
 			$rootScope.fileNameQuery = $scope.searchQuery;
 			$scope.fileNavigator.refresh();
