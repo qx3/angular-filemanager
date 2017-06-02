@@ -1,6 +1,7 @@
 (function(window, angular) {
     "use strict";
-    angular.module('FileManagerApp').service('fileUploader', ['$http', '$q', 'fileManagerConfig', '$rootScope', function ($http, $q, fileManagerConfig, $rootScope) {
+
+    angular.module('FileManagerApp').service('fileUploader', ['$http', '$q', 'fileManagerConfig', '$rootScope',  function ($http, $q, fileManagerConfig, $rootScope) {
 
         function deferredHandler(data, deferred, errorMessage) {
             if (!data || typeof data !== 'object') {
@@ -26,6 +27,7 @@
             var self = this;
             var form = new window.FormData();
             var deferred = $q.defer();
+            form.append('eventId', $rootScope.eventId);
 
 			if(path != undefined){
 				form.append('fullPath', path);
@@ -61,7 +63,6 @@
                 var fileObj = fileList.item(i);
                 fileObj instanceof window.File && form.append('file-' + i, fileObj);
             }
-
             self.requesting = true;
             $http.post(fileManagerConfig.uploadUrl, form, {
                 transformRequest: angular.identity,
