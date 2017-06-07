@@ -1,7 +1,7 @@
 (function(window, angular, $) {
     "use strict";
     angular.module('FileManagerApp').factory('item', ['$http', '$q', '$translate', 'fileManagerConfig', '$rootScope', function($http, $q, $translate, fileManagerConfig, $rootScope) {
-
+        var eventId = $rootScope.eventId;
         var Item = function(model, path) {
             var rawModel = {
                 name: model && model.Name || '',
@@ -80,7 +80,7 @@
             this.update();
             return deferred.resolve(data);
         };
-        
+
         Item.prototype.createFolder = function() {
             var self = this;
             var deferred = $q.defer();
@@ -219,7 +219,8 @@
 
             var data = {
                 id: self.model.id,
-                fullPath: path
+                fullPath: path,
+                eventId: eventId
             };
 
             self.inprocess = true;
